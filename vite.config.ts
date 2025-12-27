@@ -10,6 +10,11 @@ export default defineConfig({
     },
   },
   build: {
+      esbuild: {
+    loader: 'tsx',
+    include: /src\/.*\.tsx?$/,
+    exclude: [],
+  },
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
