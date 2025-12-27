@@ -17,20 +17,49 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Enhanced prompt engineering with template-specific styles
+  const getTemplatePromptEnhancements = (template: string): string => {
+    const templateStyles: { [key: string]: string } = {
+      'Minimal Modern': 'ultra-minimalist geometric design, negative space mastery, Swiss design principles, perfect symmetry, single elegant shape, maximum clarity, Bauhaus-inspired, contemporary sans-serif integration if text included, breathing room',
+      'Bold & Vibrant': 'energetic dynamic composition, bold saturated colors, high contrast gradients, confident shapes, powerful visual impact, modern vibrant aesthetic, eye-catching color palette, strong geometric forms, playful yet professional',
+      'Tech & Innovation': 'futuristic technological aesthetic, circuit-inspired patterns, digital gradients, innovative geometric structures, AI-inspired elements, sleek angular forms, modern tech company style, forward-thinking design, subtle tech motifs',
+      'Elegant Classic': 'timeless refined elegance, sophisticated monoline style, premium brand aesthetic, subtle luxury details, balanced classical proportions, heritage-inspired, upscale craftsmanship, refined color palette, professional traditional feel',
+      'Creative Abstract': 'unique artistic expression, abstract organic shapes, creative flowing forms, imaginative composition, distinctive memorable design, artistic interpretation, unconventional geometry, expressive curves and angles, creative industry suitable',
+      'Corporate Professional': 'corporate identity excellence, authoritative presence, business-appropriate design, trust-building aesthetics, professional color scheme, established brand feeling, credible and confident, enterprise-grade quality, serious business tone'
+    };
+    return templateStyles[template] || 'professional modern design';
+  };
+
   const handleGenerate = async () => {
     if (!brandName.trim()) return;
 
     setIsGenerating(true);
     setShowSuccess(false);
     try {
-      let prompt = `Professional premium logo design for "${brandName}". `;
+      // Build enhanced AI prompt with professional structure
+      let prompt = `Create a professional premium logo design. `;
       
-      if (description) {
-        prompt += `${description}. `;
+      // Brand identity
+      prompt += `Brand name: "${brandName}". `;
+      
+      // User's custom description if provided
+      if (description.trim()) {
+        prompt += `Design requirements: ${description.trim()}. `;
       }
       
-      prompt += `Style: ${selectedTemplate}. Main color: ${primaryColor}. `;
-      prompt += 'Vector style, clean, minimalist, professional brand identity, white background, centered, ultra high quality, modern 2026 design';
+      // Template-specific style enhancements
+      prompt += `Style: ${getTemplatePromptEnhancements(selectedTemplate)}. `;
+      
+      // Color direction
+      prompt += `Primary color palette: ${primaryColor} with complementary harmonious colors. `;
+      
+      // Technical requirements for optimal results
+      prompt += `Technical specs: vector-style graphic, clean professional composition, centered on pure white background (#FFFFFF), `;
+      prompt += `studio quality rendering, 2026 modern design trends, scalable emblem format, `;
+      prompt += `perfect for brand identity, commercial-grade quality, suitable for print and digital, `;
+      prompt += `no text unless explicitly requested, icon-based mark preferred, `;
+      prompt += `balanced proportions, memorable visual identity, `;
+      prompt += `ultra-high resolution, crisp edges, professional logo designer quality`;
 
       const encodedPrompt = encodeURIComponent(prompt);
       const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux&seed=${Date.now()}`;
@@ -154,10 +183,11 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ex: Logo geometric cu linii curate, stil minimalist modern, folosește forme abstracte..."
+              placeholder="Ex: Logo geometric cu linii curate, stil minimalist modern, folosește forme abstracte circulare, evită detalii excesive..."
               rows={5}
               className="w-full px-6 py-4 bg-white/5 border border-white/10 focus:border-purple-500/50 rounded-2xl text-white placeholder-gray-500 focus:outline-none transition-all resize-none backdrop-blur-xl leading-relaxed"
             />
+            <p className="text-xs text-gray-500 mt-1">💡 Sfat: Descrie formele, stilul și sentimentul dorit, nu doar culori</p>
           </div>
 
           {/* Color Picker */}
@@ -224,7 +254,7 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
           <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
             <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-blue-200 leading-relaxed">
-              Logo-ul este generat instant folosind AI. Poți regenera de câte ori vrei pentru variații diferite.
+              Logo-ul este generat instant folosind AI avansat. Poți regenera de câte ori vrei pentru variații diferite cu același prompt.
             </p>
           </div>
         </motion.div>
