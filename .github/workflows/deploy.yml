@@ -1,5 +1,4 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
     branches:
@@ -29,7 +28,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-      run: npm install
+        run: npm install
+
       - name: Build
         run: npm run build
 
