@@ -1,10 +1,7 @@
-'use client';
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Download, Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
-import { generateLogo } from '@/lib/pollinations';
 
 interface LogoGeneratorProps {
   selectedTemplate: string;
@@ -24,30 +21,57 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
 
     setIsGenerating(true);
     try {
-      const result = await generateLogo({
-        brandName,
-        description,
-        style: selectedTemplate,
-        primaryColor,
-      });
-      setGeneratedLogo(result.imageUrl);
+      // Construiește prompt-ul optimizat
+      let prompt = `Professional logo design for "${brandName}". `;
+      
+      if (description) {
+        prompt += `${description}. `;
+      }
+      
+      prompt += `Style: ${selectedTemplate}. Main color: ${primaryColor}. `;
+      prompt += 'Vector style, clean, minimalist, professional brand identity, white background, centered, high quality';
+
+      // Encode prompt și generează URL Pollinations
+      const encodedPrompt = encodeURIComponent(prompt);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux&seed=${Date.now()}`;
+      
+      // Preload imaginea
+      const img = new Image();
+      img.onload = () => {
+        setGeneratedLogo(imageUrl);
+        setIsGenerating(false);
+      };
+      img.onerror = () => {
+        alert('Failed to generate logo. Please try again.');
+        setIsGenerating(false);
+      };
+      img.src = imageUrl;
     } catch (error) {
       console.error('Generation failed:', error);
       alert('Failed to generate logo. Please try again.');
-    } finally {
       setIsGenerating(false);
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!generatedLogo) return;
     
-    const link = document.createElement('a');
-    link.href = generatedLogo;
-    link.download = `${brandName.replace(/\s+/g, '-').toLowerCase()}-logo.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const response = await fetch(generatedLogo);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${brandName.replace(/\s+/g, '-').toLowerCase()}-logo.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: open in new tab
+      window.open(generatedLogo, '_blank');
+    }
   };
 
   return (
@@ -168,6 +192,7 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
                   src={generatedLogo}
                   alt="Generated Logo"
                   className="max-w-full max-h-full object-contain rounded-lg"
+                  crossOrigin="anonymous"
                 />
               </div>
             ) : (
