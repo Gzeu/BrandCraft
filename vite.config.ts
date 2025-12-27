@@ -4,7 +4,6 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/BrandCraft/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -15,5 +14,16 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false,
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom'],
+        },
+      },
+    },
+  },
+  server: {
+    port: 5173,
+    open: true,
   },
 });
