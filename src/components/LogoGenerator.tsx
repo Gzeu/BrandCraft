@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Download, Sparkles, Loader2, RefreshCw, Wand2, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Download, Sparkles, Loader2, RefreshCw, Wand2, Check, AlertCircle, Settings, ShoppingBag, Sliders } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 
 interface LogoGeneratorProps {
@@ -16,8 +16,14 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
   const [generatedLogo, setGeneratedLogo] = useState<string | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
-  // Enhanced prompt engineering with template-specific styles
+  // Advanced Editor Controls (2026 Edition)
+  const [symmetry, setSymmetry] = useState(70); // 0-100: Balance & geometric precision
+  const [complexity, setComplexity] = useState(50); // 0-100: Detail level (minimal to intricate)
+  const [vibe2026, setVibe2026] = useState(80); // 0-100: Futuristic/glassmorphic aesthetic strength
+  const [iconTextRatio, setIconTextRatio] = useState(100); // 0-100: 0=text only, 100=icon only
+
   const getTemplatePromptEnhancements = (template: string): string => {
     const templateStyles: { [key: string]: string } = {
       'Minimal Modern': 'ultra-minimalist geometric design, negative space mastery, Swiss design principles, perfect symmetry, single elegant shape, maximum clarity, Bauhaus-inspired, contemporary sans-serif integration if text included, breathing room',
@@ -30,37 +36,66 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
     return templateStyles[template] || 'professional modern design';
   };
 
+  const buildAdvancedPrompt = (): string => {
+    let prompt = `Create a professional premium logo design. `;
+    
+    // Brand identity
+    prompt += `Brand name: "${brandName}". `;
+    
+    // User's custom description
+    if (description.trim()) {
+      prompt += `Design requirements: ${description.trim()}. `;
+    }
+    
+    // Template-specific style
+    prompt += `Style: ${getTemplatePromptEnhancements(selectedTemplate)}. `;
+    
+    // Advanced Editor Parameters (2026)
+    if (symmetry > 60) {
+      prompt += `Perfectly balanced symmetrical composition, ${symmetry > 80 ? 'mirror-exact' : 'harmoniously balanced'} geometric precision. `;
+    } else if (symmetry < 40) {
+      prompt += `Asymmetric dynamic layout, energetic off-center composition. `;
+    }
+
+    if (complexity < 30) {
+      prompt += `Ultra-minimalist, single iconic shape, maximum simplicity, zen aesthetic. `;
+    } else if (complexity > 70) {
+      prompt += `Rich detailed design, intricate patterns, layered depth, sophisticated visual complexity. `;
+    } else {
+      prompt += `Clean professional detail level, balanced complexity. `;
+    }
+
+    if (vibe2026 > 60) {
+      prompt += `2026 design trends: glassmorphism effects, holographic gradients, futuristic glow, modern premium aesthetic, AI-inspired visual language. `;
+    }
+
+    if (iconTextRatio > 80) {
+      prompt += `Icon-based logomark, no text, pure symbolic representation. `;
+    } else if (iconTextRatio < 20) {
+      prompt += `Wordmark design, typography-focused, minimal or no icon. `;
+    } else {
+      prompt += `Balanced icon and text combination. `;
+    }
+    
+    // Color direction
+    prompt += `Primary color palette: ${primaryColor} with complementary harmonious colors. `;
+    
+    // Technical requirements
+    prompt += `Technical specs: vector-style graphic, clean professional composition, centered on pure white background (#FFFFFF), `;
+    prompt += `studio quality rendering, 2026 modern design trends, scalable emblem format, `;
+    prompt += `perfect for brand identity, commercial-grade quality, suitable for print and digital, `;
+    prompt += `ultra-high resolution, crisp edges, professional logo designer quality, print-ready 300dpi equivalent`;
+
+    return prompt;
+  };
+
   const handleGenerate = async () => {
     if (!brandName.trim()) return;
 
     setIsGenerating(true);
     setShowSuccess(false);
     try {
-      // Build enhanced AI prompt with professional structure
-      let prompt = `Create a professional premium logo design. `;
-      
-      // Brand identity
-      prompt += `Brand name: "${brandName}". `;
-      
-      // User's custom description if provided
-      if (description.trim()) {
-        prompt += `Design requirements: ${description.trim()}. `;
-      }
-      
-      // Template-specific style enhancements
-      prompt += `Style: ${getTemplatePromptEnhancements(selectedTemplate)}. `;
-      
-      // Color direction
-      prompt += `Primary color palette: ${primaryColor} with complementary harmonious colors. `;
-      
-      // Technical requirements for optimal results
-      prompt += `Technical specs: vector-style graphic, clean professional composition, centered on pure white background (#FFFFFF), `;
-      prompt += `studio quality rendering, 2026 modern design trends, scalable emblem format, `;
-      prompt += `perfect for brand identity, commercial-grade quality, suitable for print and digital, `;
-      prompt += `no text unless explicitly requested, icon-based mark preferred, `;
-      prompt += `balanced proportions, memorable visual identity, `;
-      prompt += `ultra-high resolution, crisp edges, professional logo designer quality`;
-
+      const prompt = buildAdvancedPrompt();
       const encodedPrompt = encodeURIComponent(prompt);
       const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&model=flux&seed=${Date.now()}`;
       
@@ -99,6 +134,13 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
     } catch (error) {
       window.open(generatedLogo, '_blank');
     }
+  };
+
+  const handleZazzleLaunch = () => {
+    if (!brandName.trim()) return;
+    const searchQuery = encodeURIComponent(`${brandName} custom products`);
+    const zazzleUrl = `https://www.zazzle.com/s/${searchQuery}?rf=238894403392654484`;
+    window.open(zazzleUrl, '_blank');
   };
 
   return (
@@ -183,11 +225,10 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ex: Logo geometric cu linii curate, stil minimalist modern, folosește forme abstracte circulare, evită detalii excesive..."
-              rows={5}
+              placeholder="Ex: Logo geometric cu linii curate, stil minimalist modern, folosește forme abstracte circulare..."
+              rows={4}
               className="w-full px-6 py-4 bg-white/5 border border-white/10 focus:border-purple-500/50 rounded-2xl text-white placeholder-gray-500 focus:outline-none transition-all resize-none backdrop-blur-xl leading-relaxed"
             />
-            <p className="text-xs text-gray-500 mt-1">💡 Sfat: Descrie formele, stilul și sentimentul dorit, nu doar culori</p>
           </div>
 
           {/* Color Picker */}
@@ -208,7 +249,6 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
                   onChange={(e) => setPrimaryColor(e.target.value)}
                   className="w-full px-6 py-4 bg-white/5 border border-white/10 focus:border-purple-500/50 rounded-2xl text-white font-mono focus:outline-none transition-all backdrop-blur-xl"
                 />
-                <p className="text-xs text-gray-500 mt-2">Format HEX (ex: #8B5CF6)</p>
               </div>
             </div>
             <AnimatePresence>
@@ -224,6 +264,99 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
               )}
             </AnimatePresence>
           </div>
+
+          {/* Advanced Settings Toggle */}
+          <button
+            onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+            className="flex items-center gap-3 px-6 py-3 w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-purple-300 transition-all backdrop-blur-xl group"
+          >
+            <Sliders className="w-5 h-5" />
+            <span className="font-semibold">Advanced Studio Editor (2026)</span>
+            <motion.div
+              animate={{ rotate: showAdvancedSettings ? 180 : 0 }}
+              className="ml-auto"
+            >
+              ▼
+            </motion.div>
+          </button>
+
+          {/* Advanced Settings Panel */}
+          <AnimatePresence>
+            {showAdvancedSettings && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-6 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+              >
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="text-sm font-bold text-gray-300">Simetrie & Echilibru</label>
+                      <span className="text-sm text-purple-400 font-mono">{symmetry}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={symmetry}
+                      onChange={(e) => setSymmetry(Number(e.target.value))}
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">0 = Asimetric energic • 100 = Simetrie perfectă</p>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="text-sm font-bold text-gray-300">Complexitate Vizuală</label>
+                      <span className="text-sm text-pink-400 font-mono">{complexity}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={complexity}
+                      onChange={(e) => setComplexity(Number(e.target.value))}
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">0 = Ultra-minimalist • 100 = Detalii bogate</p>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="text-sm font-bold text-gray-300">Vibe 2026 Strength</label>
+                      <span className="text-sm text-blue-400 font-mono">{vibe2026}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={vibe2026}
+                      onChange={(e) => setVibe2026(Number(e.target.value))}
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">0 = Classic • 100 = Futuristic glassmorphic</p>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="text-sm font-bold text-gray-300">Icon / Text Ratio</label>
+                      <span className="text-sm text-green-400 font-mono">{iconTextRatio}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={iconTextRatio}
+                      onChange={(e) => setIconTextRatio(Number(e.target.value))}
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-green-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">0 = Wordmark only • 100 = Icon-based logomark</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Generate Button */}
           <motion.button
@@ -254,7 +387,7 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
           <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
             <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-blue-200 leading-relaxed">
-              Logo-ul este generat instant folosind AI avansat. Poți regenera de câte ori vrei pentru variații diferite cu același prompt.
+              Logo-ul este generat instant folosind AI avansat Pollinations Flux. Poți regenera de câte ori vrei pentru variații diferite.
             </p>
           </div>
         </motion.div>
@@ -331,29 +464,46 @@ export default function LogoGenerator({ selectedTemplate, onBack }: LogoGenerato
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex gap-4 mt-8"
+                    className="space-y-4 mt-8"
                   >
+                    <div className="flex gap-4">
+                      <motion.button
+                        onClick={handleGenerate}
+                        disabled={isGenerating}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex-1 bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/20 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 backdrop-blur-xl"
+                      >
+                        <RefreshCw className="w-5 h-5" />
+                        Regenerează
+                      </motion.button>
+                      <motion.button
+                        onClick={handleDownload}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="relative flex-1 group overflow-hidden rounded-2xl"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
+                        <div className="relative py-4 flex items-center justify-center gap-2">
+                          <Download className="w-5 h-5 text-white" />
+                          <span className="text-white font-bold">Download HD</span>
+                        </div>
+                      </motion.button>
+                    </div>
+
+                    {/* Zazzle Integration */}
                     <motion.button
-                      onClick={handleGenerate}
-                      disabled={isGenerating}
+                      onClick={handleZazzleLaunch}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="flex-1 bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/20 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 backdrop-blur-xl"
+                      className="relative w-full group overflow-hidden rounded-2xl"
                     >
-                      <RefreshCw className="w-5 h-5" />
-                      Regenerează
-                    </motion.button>
-                    <motion.button
-                      onClick={handleDownload}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="relative flex-1 group overflow-hidden rounded-2xl"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
                       <div className="relative py-4 flex items-center justify-center gap-2">
-                        <Download className="w-5 h-5 text-white" />
-                        <span className="text-white font-bold">Download HD</span>
+                        <ShoppingBag className="w-5 h-5 text-white" />
+                        <span className="text-white font-bold">Print on Products (Zazzle)</span>
                       </div>
                     </motion.button>
                   </motion.div>
